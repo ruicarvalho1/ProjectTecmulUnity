@@ -26,8 +26,8 @@ public class PieceCreator : MonoBehaviour
             }
         }
     }
-
-    public GameObject CreatePiece(Type type)
+    
+    public GameObject CreatePiece(Type type, TeamColor team)
     {
         if (!nameToPieceDict.TryGetValue(type.ToString(), out GameObject prefab))
         {
@@ -35,9 +35,15 @@ public class PieceCreator : MonoBehaviour
             return null;
         }
 
-        GameObject newPiece = Instantiate(prefab);
+   
+        Quaternion rotation = team == TeamColor.White
+            ? Quaternion.Euler(0, 180, 0)
+            : Quaternion.Euler(0, 0, 0);
+
+        GameObject newPiece = Instantiate(prefab, Vector3.zero, rotation);
         return newPiece;
     }
+
 
     public Material GetTeamMaterial(TeamColor team)
     {

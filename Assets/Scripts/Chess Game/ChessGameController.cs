@@ -93,7 +93,7 @@ public class ChessGameController : MonoBehaviour
 
     public void CreatePieceAndInitialize(Vector2Int squareCoords, TeamColor team, Type type)
     {
-        Piece newPiece = pieceCreator.CreatePiece(type).GetComponent<Piece>();
+        Piece newPiece = pieceCreator.CreatePiece(type, team).GetComponent<Piece>();
         newPiece.SetData(squareCoords, team, board);
 
         Material teamMaterial = pieceCreator.GetTeamMaterial(team);

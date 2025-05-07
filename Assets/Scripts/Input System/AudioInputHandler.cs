@@ -1,16 +1,22 @@
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public class AudioInputHandler : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public AudioClip movePieceSound;
+    private AudioSource audioSource;
+
     void Start()
     {
-        
+        audioSource = GetComponent<AudioSource>();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void PlayMoveSound()
     {
-        
+        if (movePieceSound != null)
+        {
+            Debug.Log("Som de movimento chamado!");
+            audioSource.PlayOneShot(movePieceSound);
+        }
     }
 }

@@ -51,6 +51,7 @@ public class Board : MonoBehaviour
     {
         Vector2Int coords = CalculateCoordsFromPosition(inputPosition);
         Piece piece = GetPieceOnSquare(coords);
+        Debug.Log("Square selected: " + piece);
         if (selectedPiece)
         {
             if (piece != null && selectedPiece == piece)

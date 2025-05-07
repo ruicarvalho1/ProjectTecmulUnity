@@ -15,7 +15,7 @@ public class BoardInputHandler : MonoBehaviour, IInputHandler
 
     public void ProcessInput(Vector3 inputPosition, GameObject selectedObject, Action onClick)
     {
-        // HERE!!!!!!!!!!!!!!!! 
+        //Debug.Log("Input Position: " + inputPosition);
         board.OnSquareSelected(inputPosition);
     }
 }

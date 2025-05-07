@@ -11,6 +11,7 @@ public class ColliderInputReciever : InputReciever
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Debug.DrawRay(ray.origin, ray.direction * 100, Color.red, 2f);
             if (Physics.Raycast(ray, out hit))
             {
                 clickPosition = hit.point;

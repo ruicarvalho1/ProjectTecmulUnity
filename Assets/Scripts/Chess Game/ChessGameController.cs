@@ -1,18 +1,22 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(PieceCreator))]
 public class ChessGameController : MonoBehaviour
 {
+    private enum GameState {Init, Play, Finished}
     [SerializeField] private BoardLayout startingBoardLayout;
     [SerializeField] private Board board;
+    [SerializeField] private ChessUIManager uiManager;
 
     private PieceCreator pieceCreator;
     private ChessPlayer whitePlayer;
     private ChessPlayer blackPlayer;
     private ChessPlayer activePlayer;
+    private GameState gameState;
 
     private void Awake()
     {
@@ -38,12 +42,38 @@ public class ChessGameController : MonoBehaviour
 
     private void StartNewGame()
     {
+        uiManager.HideUI();
+        SetGameState(GameState.Init);
         board.SetDependencies(this);
         CreatePiecesFromLayout(startingBoardLayout);
         activePlayer = whitePlayer;
         GenerateAllPossiblePlayerMoves(activePlayer);
+        SetGameState(GameState.Play);
     }
 
+    public void RestartGame(){
+        DestroyAllPieces();
+        board.OnGameRestarted();
+        whitePlayer.OnGameRestarted();
+        blackPlayer.OnGameRestarted();
+        StartNewGame();
+    }
+
+    private void DestroyAllPieces()
+    {
+        whitePlayer.activePieces.ForEach(piece => Destroy(piece.gameObject));
+        blackPlayer.activePieces.ForEach(piece => Destroy(piece.gameObject));
+    }
+
+
+    private void SetGameState(GameState gameState)
+    {
+        this.gameState = gameState;
+    }
+
+    public bool IsGameInProgress(){
+        return gameState == GameState.Play;
+    }
 
 
     private void CreatePiecesFromLayout(BoardLayout layout)
@@ -61,7 +91,7 @@ public class ChessGameController : MonoBehaviour
 
 
 
-    private void CreatePieceAndInitialize(Vector2Int squareCoords, TeamColor team, Type type)
+    public void CreatePieceAndInitialize(Vector2Int squareCoords, TeamColor team, Type type)
     {
         Piece newPiece = pieceCreator.CreatePiece(type).GetComponent<Piece>();
         newPiece.SetData(squareCoords, team, board);
@@ -89,8 +119,39 @@ public class ChessGameController : MonoBehaviour
     {
         GenerateAllPossiblePlayerMoves(activePlayer);
         GenerateAllPossiblePlayerMoves(GetOpponentToPlayer(activePlayer));
-        ChangeActiveTeam();
+        if(CheckIfGameIsFinnished())
+            EndGame();
+        else
+            ChangeActiveTeam();
     }
+
+    private bool CheckIfGameIsFinnished()
+    {
+        Piece[] kingAttackingPieces = activePlayer.GetPiecesAttackingOppositePiece<King>();
+        if(kingAttackingPieces.Length > 0){
+            ChessPlayer opponentPlayer = GetOpponentToPlayer(activePlayer);
+            Piece attackedKing = opponentPlayer.GetPiecesOfType<King>().FirstOrDefault();
+            opponentPlayer.RemoveMovesEnablingAttackOnPiece<King>(activePlayer,  attackedKing);
+
+            int avaliableKingMoves = attackedKing.avaliableMoves.Count;
+            if(avaliableKingMoves == 0){
+                bool canCoverKing = opponentPlayer.CanHidePieceFromAttacking<King>(activePlayer);
+                if(!canCoverKing){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    private void EndGame()
+    {
+        Debug.Log("Game Finished!");
+        uiManager.OnGameFinished(activePlayer.team.ToString());
+        SetGameState(GameState.Finished);
+    }
+
 
     private void ChangeActiveTeam()
     {
@@ -101,4 +162,17 @@ public class ChessGameController : MonoBehaviour
     {
         return player == whitePlayer ? blackPlayer : whitePlayer;
     }
+
+    public void RemoveMovesEnablingAttackOnPieceOfType<T>(Piece piece) where T : Piece
+    {
+        activePlayer.RemoveMovesEnablingAttackOnPiece<T>(GetOpponentToPlayer(activePlayer), piece);
+    }
+
+    public void OnPieceRemoved(Piece piece)
+    {
+        ChessPlayer pieceOwner = (piece.team == TeamColor.White) ? whitePlayer : blackPlayer; 
+        pieceOwner.RemovePiece(piece);
+        Destroy(piece.gameObject);
+    }
+
 }

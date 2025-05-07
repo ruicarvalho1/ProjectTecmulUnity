@@ -1,16 +1,16 @@
 using UnityEngine;
+using UnityEngine.Events;
 
-public class UIInputReceive : MonoBehaviour
+public class UIInputReceiver : InputReciever
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private UnityEvent clickEvent;
+
+    public override void OnInputRecieved()
     {
-        
+        foreach (var handler in inputHandlers)
+        {
+            handler.ProcessInput(Input.mousePosition, gameObject, () => clickEvent.Invoke());
+        }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

@@ -1,16 +1,11 @@
+using System;
 using UnityEngine;
 
-public class UIInputHandler : MonoBehaviour
+public class UIInputHandler : MonoBehaviour, IInputHandler
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public void ProcessInput(Vector3 inputPosition, GameObject selectedObject, Action callback)
     {
-        
+        callback?.Invoke();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

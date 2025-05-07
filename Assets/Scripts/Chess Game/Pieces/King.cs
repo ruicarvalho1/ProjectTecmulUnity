@@ -17,9 +17,41 @@ public class King : Piece
 		new Vector2Int(1, -1),
 	};
 
+    private Vector2Int leftCastlingMove;
+    private Vector2Int rightCastlingMove;
+    private Piece leftRook;
+    private Piece rightRook;
+
     public override List<Vector2Int> SelectAvaliableSquares()
     {
         avaliableMoves.Clear();
+        AssignStandardMoves();
+        AssignCastelingMoves();
+        return avaliableMoves;
+
+    }
+
+    private void AssignCastelingMoves()
+    {
+        if(hasMoved)
+            return;
+        
+        leftRook = GetPieceInDirection<Rook>(team, Vector2Int.left);
+        if(leftRook && !leftRook.hasMoved){
+            leftCastlingMove = occupiedSquare + Vector2Int.left * 2;
+            avaliableMoves.Add(leftCastlingMove);
+        }
+
+        rightRook = GetPieceInDirection<Rook>(team, Vector2Int.right);
+        if(rightRook && !rightRook.hasMoved){
+            rightCastlingMove = occupiedSquare + Vector2Int.right * 2;
+            avaliableMoves.Add(rightCastlingMove);
+        }
+        
+    }
+
+    private void AssignStandardMoves()
+    {
         float range = 1;
         foreach (var direction in directions)
         {
@@ -40,8 +72,19 @@ public class King : Piece
                     break;
             }
         }
-        return avaliableMoves;
-
     }
-  
+
+    public override void MovePiece(Vector2Int coords)
+    {
+        base.MovePiece(coords);
+        if(coords == leftCastlingMove){
+            board.UpdateBoardOnPieceMove(coords + Vector2Int.right, leftRook.occupiedSquare, leftRook, null);
+            leftRook.MovePiece(coords + Vector2Int.right);
+        }else if(coords == rightCastlingMove){
+            board.UpdateBoardOnPieceMove(coords + Vector2Int.left, rightRook.occupiedSquare, rightRook, null);
+            rightRook.MovePiece(coords + Vector2Int.left);
+        }
+    }
+
+
 }

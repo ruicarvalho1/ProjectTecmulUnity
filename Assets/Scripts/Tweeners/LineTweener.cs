@@ -1,16 +1,12 @@
 using UnityEngine;
+using DG.Tweening;
 
-public class LineTweener : MonoBehaviour
+public class LineTweener : MonoBehaviour, IObjectTweener
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private float speed;
+    public void MoveTo(Transform transform, Vector3 targetPosition)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        float distance = Vector3.Distance(targetPosition, transform.position);
+        transform.DOMove(targetPosition, distance / speed).SetEase(Ease.Linear);
     }
 }

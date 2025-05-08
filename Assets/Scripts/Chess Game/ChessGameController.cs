@@ -59,13 +59,22 @@ public abstract class ChessGameController : MonoBehaviour
 
     public void RestartGame()
     {
-        DestroyAllPieces();                      
-        board.OnGameRestarted();                
-        whitePlayer.OnGameRestarted();           
-        blackPlayer.OnGameRestarted();           
-        StartNewGame();                         
-        TryToStartThisGame();                    
+        if (Photon.Pun.PhotonNetwork.InRoom)
+        {
+            Debug.Log("Multiplayer: leaving room and disconnecting.");
+            Photon.Pun.PhotonNetwork.LeaveRoom();
+            Photon.Pun.PhotonNetwork.Disconnect(); 
+            return; 
+        }
+        
+        DestroyAllPieces();
+        board.OnGameRestarted();
+        whitePlayer.OnGameRestarted();
+        blackPlayer.OnGameRestarted();
+        StartNewGame();
+        TryToStartThisGame();
     }
+
 
 
     private void DestroyAllPieces()

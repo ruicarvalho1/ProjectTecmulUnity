@@ -17,6 +17,8 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     private ChessLevel playerLevel;
 
+    private bool shouldJoinAfterConnect = false; // <- novo flag
+
     void Awake()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
@@ -29,14 +31,26 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public void Connect()
     {
-        if (PhotonNetwork.IsConnected)
+        if (PhotonNetwork.IsConnected && PhotonNetwork.NetworkClientState == ClientState.ConnectedToMasterServer)
         {
-            PhotonNetwork.JoinRandomRoom(new ExitGames.Client.Photon.Hashtable() { { LEVEL, playerLevel } }, MAX_PLAYERS);
+            Debug.Log("Already connected to Master Server — joining room.");
+            JoinRoom();
         }
         else
         {
+            Debug.Log("Connecting to Photon...");
+            shouldJoinAfterConnect = true; // <- ativar flag
             PhotonNetwork.ConnectUsingSettings();
         }
+    }
+
+    private void JoinRoom()
+    {
+        Debug.Log($"Trying to join random room with level: {playerLevel}");
+        PhotonNetwork.JoinRandomRoom(
+            new ExitGames.Client.Photon.Hashtable() { { LEVEL, playerLevel } },
+            MAX_PLAYERS
+        );
     }
 
     private void Update()
@@ -48,8 +62,14 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        Debug.LogError($"Connected to server. Looking for random room with level {playerLevel}");
-        PhotonNetwork.JoinRandomRoom(new ExitGames.Client.Photon.Hashtable() { { LEVEL, playerLevel } }, MAX_PLAYERS);
+        Debug.LogError($"Connected to Master Server.");
+        if (shouldJoinAfterConnect)
+        {
+            shouldJoinAfterConnect = false;
+            JoinRoom();
+        }
+
+        PhotonNetwork.JoinLobby(); // opcional, útil se usares lobby info na UI
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
@@ -68,9 +88,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         Debug.LogError($"Player {PhotonNetwork.LocalPlayer.ActorNumber} joined room with level: {(ChessLevel)PhotonNetwork.CurrentRoom.CustomProperties[LEVEL]}");
 
         if (gameInitializer == null)
-        {
             return;
-        }
 
         gameInitializer.CreateMultiplayerBoard();
         PrepareTeamSelectionOptions();
@@ -94,6 +112,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     {
         Debug.LogError($"Player {newPlayer.ActorNumber} entered the room");
     }
+
     #endregion
 
     public void SetPlayerLevel(ChessLevel level)
@@ -117,16 +136,12 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { TEAM, teamInt } });
 
         gameInitializer.InitializeMultiplayerController();
-        
-        
+
         if (chessGameController == null)
         {
             chessGameController = FindObjectOfType<MultiplayerChessGameController>();
             if (chessGameController == null)
-            {
-            
                 return;
-            }
         }
 
         chessGameController.SetLocalPlayer((TeamColor)teamInt);
@@ -138,4 +153,4 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     {
         return PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers;
     }
-} 
+}

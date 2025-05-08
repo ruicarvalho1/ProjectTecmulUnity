@@ -2,6 +2,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class NetworkManager : MonoBehaviourPunCallbacks
@@ -30,8 +31,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsConnected)
         {
-            Debug.Log("Already connected to Photon.");
-     
+            PhotonNetwork.JoinRandomRoom(new ExitGames.Client.Photon.Hashtable() { { LEVEL, playerLevel } }, MAX_PLAYERS);
         }
         else
         {
@@ -48,40 +48,34 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        Debug.Log($"Connected to Master Server. Ready to join/create room manually.");
-        PhotonNetwork.JoinLobby(); 
+        Debug.LogError($"Connected to server. Looking for random room with level {playerLevel}");
+        PhotonNetwork.JoinRandomRoom(new ExitGames.Client.Photon.Hashtable() { { LEVEL, playerLevel } }, MAX_PLAYERS);
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
-        Debug.LogWarning($"Joining random room failed: {message}. Creating new room.");
+        Debug.LogError($"Joining random room failed: {message}. Creating new room.");
         PhotonNetwork.CreateRoom(null, new RoomOptions
         {
-            MaxPlayers = MAX_PLAYERS,
             CustomRoomPropertiesForLobby = new string[] { LEVEL },
+            MaxPlayers = MAX_PLAYERS,
             CustomRoomProperties = new ExitGames.Client.Photon.Hashtable() { { LEVEL, playerLevel } }
         });
     }
 
     public override void OnJoinedRoom()
     {
-        Debug.Log($"Player {PhotonNetwork.LocalPlayer.ActorNumber} joined room.");
-    }
+        Debug.LogError($"Player {PhotonNetwork.LocalPlayer.ActorNumber} joined room with level: {(ChessLevel)PhotonNetwork.CurrentRoom.CustomProperties[LEVEL]}");
 
-    public override void OnPlayerEnteredRoom(Player newPlayer)
-    {
-        Debug.Log($"Player {newPlayer.ActorNumber} entered the room. Current count: {PhotonNetwork.CurrentRoom.PlayerCount}");
-
-        if (IsRoomFull())
+        if (gameInitializer == null)
         {
-            Debug.Log("Room is full. Starting multiplayer game setup...");
-            gameInitializer.CreateMultiplayerBoard();
-            PrepareTeamSelectionOptions();
-            uiManager?.ShowTeamSelectionScreen();
+            return;
         }
-    }
 
-    #endregion
+        gameInitializer.CreateMultiplayerBoard();
+        PrepareTeamSelectionOptions();
+        uiManager?.ShowTeamSelectionScreen();
+    }
 
     private void PrepareTeamSelectionOptions()
     {
@@ -96,6 +90,12 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        Debug.LogError($"Player {newPlayer.ActorNumber} entered the room");
+    }
+    #endregion
+
     public void SetPlayerLevel(ChessLevel level)
     {
         playerLevel = level;
@@ -104,12 +104,6 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public void SetPlayerTeam(int teamInt)
     {
-        if (!IsRoomFull())
-        {
-            Debug.LogWarning("Room is not full. Cannot set team or start game.");
-            return;
-        }
-
         if (PhotonNetwork.CurrentRoom.PlayerCount > 1)
         {
             var player = PhotonNetwork.CurrentRoom.GetPlayer(1);
@@ -123,13 +117,14 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { TEAM, teamInt } });
 
         gameInitializer.InitializeMultiplayerController();
-
+        
+        
         if (chessGameController == null)
         {
             chessGameController = FindObjectOfType<MultiplayerChessGameController>();
             if (chessGameController == null)
             {
-                Debug.LogError("MultiplayerChessGameController not found after init.");
+            
                 return;
             }
         }
@@ -141,12 +136,6 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public bool IsRoomFull()
     {
-        return PhotonNetwork.CurrentRoom != null && PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers;
+        return PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers;
     }
-
- 
-    public void JoinOrCreateMultiplayerRoom()
-    {
-        PhotonNetwork.JoinRandomRoom(new ExitGames.Client.Photon.Hashtable() { { LEVEL, playerLevel } }, MAX_PLAYERS);
-    }
-}
+} 

@@ -69,7 +69,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
             JoinRoom();
         }
 
-        PhotonNetwork.JoinLobby(); // opcional, útil se usares lobby info na UI
+        PhotonNetwork.JoinLobby();
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
@@ -102,6 +102,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
             var player = PhotonNetwork.CurrentRoom.GetPlayer(1);
             if (player.CustomProperties.ContainsKey(TEAM))
             {
+                
                 var occupiedTeam = player.CustomProperties[TEAM];
                 uiManager.RestrictTeamChoice((TeamColor)occupiedTeam);
             }

@@ -104,7 +104,8 @@ public class ChessUIManager : MonoBehaviour
 
 	internal void RestrictTeamChoice(TeamColor occpiedTeam)
 	{
-		Button buttonToDeactivate = occpiedTeam == TeamColor.White ? whiteTeamButtonButton : blackTeamButtonButton;
-		buttonToDeactivate.interactable = false;
+			Button buttonToDeactivate = occpiedTeam == TeamColor.White ? whiteTeamButtonButton : blackTeamButtonButton; 
+			buttonToDeactivate.interactable = false;
+		
 	}
 }

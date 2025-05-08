@@ -49,31 +49,42 @@ public abstract class ChessGameController : MonoBehaviour
 
     public void StartNewGame()
     {
+        
+        var teamColor = TeamColor.none;
+        
         uiManager.OnGameStarted();
         SetGameState(GameState.Init);
+        uiManager.RestrictTeamChoice(teamColor);
         CreatePiecesFromLayout(startingBoardLayout);
         activePlayer = whitePlayer;
         GenerateAllPossiblePlayerMoves(activePlayer);
         SetGameState(GameState.Play);
     }
 
-   public void RestartGame()
-{
-     if (Photon.Pun.PhotonNetwork.InRoom)
-     {
-        Debug.Log("Multiplayer: leaving room and disconnecting.");
-        Photon.Pun.PhotonNetwork.LeaveRoom();
-        Photon.Pun.PhotonNetwork.Disconnect(); 
+    public void RestartGame()
+    {
+        if (Photon.Pun.PhotonNetwork.InRoom)
+        {
+            Debug.Log("Multiplayer: leaving room and disconnecting.");
+            
+            ExitGames.Client.Photon.Hashtable props = Photon.Pun.PhotonNetwork.LocalPlayer.CustomProperties;
+            if (props.ContainsKey("team"))
+            {
+                props["team"] = null; 
+                Photon.Pun.PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+                Debug.Log("Cleared selected team from custom properties.");
+            }
+
+            Photon.Pun.PhotonNetwork.LeaveRoom();
+            Photon.Pun.PhotonNetwork.Disconnect();
+        }
         
-     }
-    
-    DestroyAllPieces();
-    board.OnGameRestarted();
-    whitePlayer.OnGameRestarted();
-    blackPlayer.OnGameRestarted();
-    //StartNewGame();
-    //TryToStartThisGame();
-}
+        DestroyAllPieces();
+        board.OnGameRestarted();
+        whitePlayer.OnGameRestarted();
+        blackPlayer.OnGameRestarted();
+    }
+
 
 
 

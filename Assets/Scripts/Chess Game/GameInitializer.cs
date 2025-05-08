@@ -21,7 +21,7 @@ public class GameInitializer : MonoBehaviour
     {
         if (!networkManager.IsRoomFull())
         {
-            GameObject boardObj = PhotonNetwork.Instantiate(multiplayerBoardPrefab.name, boardAnchor.position, boardAnchor.rotation);
+            PhotonNetwork.Instantiate(multiplayerBoardPrefab.name, boardAnchor.position, boardAnchor.rotation);
             StartCoroutine(WaitForBoardAndInit());
         }
     }
@@ -29,12 +29,11 @@ public class GameInitializer : MonoBehaviour
     private IEnumerator WaitForBoardAndInit()
     {
         yield return new WaitUntil(() => FindObjectOfType<MultiplayerBoard>() != null);
-        InitializeMultiplayerController();
-    }
 
-    public void CreateSinglePlayerBoard()
-    {
-        Instantiate(singleplayerBoardPrefab, boardAnchor);
+        // Extra frame delay to ensure everything is initialized
+        yield return new WaitForEndOfFrame();
+
+        InitializeMultiplayerController();
     }
 
     public void InitializeMultiplayerController()
@@ -49,13 +48,17 @@ public class GameInitializer : MonoBehaviour
             networkManager.SetDependencies(controller);
             board.SetDependencies(controller);
 
-            // Garantir que o jogo inicia corretamente se necessário
-            // controller.StartNewGame(); // Descomente se o jogo não estiver a iniciar automaticamente
+            controller.StartNewGame();
         }
         else
         {
-            Debug.LogError("MultiplayerBoard not found! Certifique-se que foi instanciado corretamente.");
+            Debug.LogError("MultiplayerBoard not found! Ensure it was instantiated correctly.");
         }
+    }
+
+    public void CreateSinglePlayerBoard()
+    {
+        Instantiate(singleplayerBoardPrefab, boardAnchor);
     }
 
     public void InitializeSingleplayerController()
@@ -71,7 +74,7 @@ public class GameInitializer : MonoBehaviour
         }
         else
         {
-            Debug.LogError("SingleplayerBoard not found! Certifique-se que foi instanciado corretamente.");
+            Debug.LogError("SingleplayerBoard not found! Ensure it was instantiated correctly.");
         }
     }
 }

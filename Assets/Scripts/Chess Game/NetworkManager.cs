@@ -11,7 +11,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 	private const string TEAM = "team";
 	private const byte MAX_PLAYERS = 2;
 	[SerializeField] private ChessUIManager uiManager;
-
+	private MultiplayerChessGameController chessGameController;
 
 	private ChessLevel playerLevel;
 
@@ -20,6 +20,10 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 		PhotonNetwork.AutomaticallySyncScene = true;
 	}
 
+	public void SetDependencies(MultiplayerChessGameController chessGameController)
+	{
+		this.chessGameController = chessGameController;
+	}
 
 	public void Connect()
 	{
@@ -64,7 +68,6 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 	public override void OnJoinedRoom()
 	{
 		Debug.LogError($"Player {PhotonNetwork.LocalPlayer.ActorNumber} joined a room with level: {(ChessLevel)PhotonNetwork.CurrentRoom.CustomProperties[LEVEL]}");
-		//gameInitializer.CreateMultiplayerBoard();
 		PrepareTeamSelectionOptions();
 		uiManager.ShowTeamSelectionScreen();
 
@@ -95,18 +98,6 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 		playerLevel = level;
 		PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { LEVEL, level } });
 	}
-	
-	internal void SelectTeam(int team)
-	{
-		PhotonNetwork.LocalPlayer.SetCustomProperties(
-			new ExitGames.Client.Photon.Hashtable
-			{
-				{ TEAM, team }
-			}
-		);
-	}
-	
-	
 
 	public void SetPlayerTeam(int teamInt)
 	{
@@ -120,6 +111,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 			}
 		}
 		PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { TEAM, teamInt } });
+		chessGameController.SetLocalPlayer((TeamColor)teamInt);
 	}
 
 

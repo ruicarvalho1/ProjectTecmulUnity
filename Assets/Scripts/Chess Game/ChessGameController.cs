@@ -5,46 +5,50 @@ using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(PieceCreator))]
-public class ChessGameController : MonoBehaviour
+public abstract class ChessGameController : MonoBehaviour
+
 {
-    private enum GameState {Init, Play, Finished}
+    public enum GameState {Init, Play, Finished}
     [SerializeField] private BoardLayout startingBoardLayout;
-    [SerializeField] private Board board;
-    [SerializeField] private ChessUIManager uiManager;
+    private Board board;
+    private ChessUIManager uiManager;
 
     private PieceCreator pieceCreator;
-    private ChessPlayer whitePlayer;
-    private ChessPlayer blackPlayer;
-    private ChessPlayer activePlayer;
-    private GameState gameState;
+    protected ChessPlayer whitePlayer;
+    protected ChessPlayer blackPlayer;
+    protected ChessPlayer activePlayer;
+    protected GameState gameState;
+    
+    protected abstract void SetGameState(GameState state);
+    public abstract void TryToStartThisGame();
+    public abstract bool CanPerformMove();
 
     private void Awake()
-    {
-        SetDependencies();
-        CreatePlayers();
-    }
-
-    private void SetDependencies()
     {
         pieceCreator = GetComponent<PieceCreator>();
     }
 
-    private void CreatePlayers()
+    internal void SetDependencies( ChessUIManager uIManager, Board board)
+    {
+        this.uiManager = uIManager;
+        this.board = board;
+    }
+
+    public void InitializeGame()
+    {     
+        CreatePlayers();       
+    }
+
+
+    public void CreatePlayers()
     {
         whitePlayer = new ChessPlayer(TeamColor.White, board);
         blackPlayer = new ChessPlayer(TeamColor.Black, board);
     }
-
-    private void Start()
-    {
-        StartNewGame();
-    }
-
-    private void StartNewGame()
+    public void StartNewGame()
     {
         //uiManager.HideUI();
         SetGameState(GameState.Init);
-        board.SetDependencies(this);
         CreatePiecesFromLayout(startingBoardLayout);
         activePlayer = whitePlayer;
         GenerateAllPossiblePlayerMoves(activePlayer);
@@ -57,6 +61,7 @@ public class ChessGameController : MonoBehaviour
         whitePlayer.OnGameRestarted();
         blackPlayer.OnGameRestarted();
         StartNewGame();
+        TryToStartThisGame();
     }
 
     private void DestroyAllPieces()
@@ -64,12 +69,7 @@ public class ChessGameController : MonoBehaviour
         whitePlayer.activePieces.ForEach(piece => Destroy(piece.gameObject));
         blackPlayer.activePieces.ForEach(piece => Destroy(piece.gameObject));
     }
-
-
-    private void SetGameState(GameState gameState)
-    {
-        this.gameState = gameState;
-    }
+    
 
     public bool IsGameInProgress(){
         return gameState == GameState.Play;

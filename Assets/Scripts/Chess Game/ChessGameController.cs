@@ -86,15 +86,7 @@ public abstract class ChessGameController : MonoBehaviour
     }
 
 
-
-
-
-    public void DestroyAllPieces()
-    {
-        whitePlayer.activePieces.ForEach(piece => Destroy(piece.gameObject));
-        blackPlayer.activePieces.ForEach(piece => Destroy(piece.gameObject));
-    }
-
+    
     public bool IsGameInProgress()
     {
         return gameState == GameState.Play;

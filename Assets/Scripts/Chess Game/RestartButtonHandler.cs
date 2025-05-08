@@ -13,11 +13,11 @@ public class RestartButtonHandler : MonoBehaviourPunCallbacks
         if (PhotonNetwork.InRoom)
         {
             Debug.Log("Multiplayer: leaving room...");
-            PhotonNetwork.LeaveRoom(); 
+            PhotonNetwork.LeaveRoom();
         }
         else
         {
-            ShowMainMenu(); 
+            ShowMainMenu();
         }
     }
 
@@ -29,11 +29,10 @@ public class RestartButtonHandler : MonoBehaviourPunCallbacks
 
     private void ShowMainMenu()
     {
-
         var gameController = FindObjectOfType<ChessGameController>();
         if (gameController != null)
         {
-            Destroy(gameController.gameObject); 
+            Destroy(gameController.gameObject);
         }
 
         if (gameOverScreen != null)

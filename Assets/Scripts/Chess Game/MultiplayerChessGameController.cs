@@ -1,3 +1,4 @@
+using System;
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
@@ -5,12 +6,12 @@ using UnityEngine;
 
 public class MultiplayerChessGameController : ChessGameController, IOnEventCallback
 {
-    
     protected const byte SET_GAME_STATE_EVENT_CODE = 1;
+
     private NetworkManager networkManager;
     private ChessPlayer localPlayer;
 
-    public void SetMultiplayerDependencies (NetworkManager networkManager)
+    public void SetMultiplayerDependencies(NetworkManager networkManager)
     {
         this.networkManager = networkManager;
     }
@@ -37,34 +38,47 @@ public class MultiplayerChessGameController : ChessGameController, IOnEventCallb
 
     public override void TryToStartThisGame()
     {
-        if (networkManager.IsRoomFull())
+        if (networkManager != null && networkManager.IsRoomFull())
         {
             SetGameState(GameState.Play);
         }
     }
-    
+
     public override bool CanPerformMove()
     {
-        if (!IsGameInProgress() || !IsLocalPlayersTurn())
-            return false;
-
-        return true;
+        return IsGameInProgress() && IsLocalPlayersTurn();
     }
+
     protected override void SetGameState(GameState state)
     {
-        object[] content = new object[] { (int)state };
-        RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.All };
-        PhotonNetwork.RaiseEvent(SET_GAME_STATE_EVENT_CODE, state, raiseEventOptions, SendOptions.SendReliable);
+        this.gameState = state;
+
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions
+        {
+            Receivers = ReceiverGroup.All
+        };
+
+        PhotonNetwork.RaiseEvent(
+            SET_GAME_STATE_EVENT_CODE,
+            (int)state,
+            raiseEventOptions,
+            SendOptions.SendReliable
+        );
     }
 
     public void OnEvent(EventData photonEvent)
     {
-        byte eventCode = photonEvent.Code;
-        if (eventCode == SET_GAME_STATE_EVENT_CODE)
+        if (photonEvent.Code == SET_GAME_STATE_EVENT_CODE)
         {
-            object[] data = (object[])photonEvent.CustomData;
-            GameState state = (GameState)data[0];
-            this.gameState = state;
+            if (photonEvent.CustomData is int stateInt && Enum.IsDefined(typeof(GameState), stateInt))
+            {
+                this.gameState = (GameState)stateInt;
+                Debug.Log($"Game state synchronized: {gameState}");
+            }
+            else
+            {
+                Debug.LogError("Invalid data received in SET_GAME_STATE_EVENT_CODE.");
+            }
         }
     }
 }

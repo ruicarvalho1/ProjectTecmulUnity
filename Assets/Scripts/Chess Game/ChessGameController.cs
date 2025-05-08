@@ -6,21 +6,20 @@ using UnityEngine;
 
 [RequireComponent(typeof(PieceCreator))]
 public abstract class ChessGameController : MonoBehaviour
-
 {
-    public enum GameState {Init, Play, Finished}
+    public enum GameState { Init, Play, Finished }
+
     [SerializeField] private BoardLayout startingBoardLayout;
     private Board board;
     private ChessUIManager uiManager;
     private CameraSetup cameraSetup;
-    
 
     private PieceCreator pieceCreator;
     protected ChessPlayer whitePlayer;
     protected ChessPlayer blackPlayer;
     protected ChessPlayer activePlayer;
     protected GameState gameState;
-    
+
     protected abstract void SetGameState(GameState state);
     public abstract void TryToStartThisGame();
     public abstract bool CanPerformMove();
@@ -30,7 +29,7 @@ public abstract class ChessGameController : MonoBehaviour
         pieceCreator = GetComponent<PieceCreator>();
     }
 
-    internal void SetDependencies( ChessUIManager uIManager, Board board, CameraSetup cameraSetup)
+    internal void SetDependencies(ChessUIManager uIManager, Board board, CameraSetup cameraSetup)
     {
         this.uiManager = uIManager;
         this.board = board;
@@ -38,16 +37,16 @@ public abstract class ChessGameController : MonoBehaviour
     }
 
     public void InitializeGame()
-    {     
-        CreatePlayers();       
+    {
+        CreatePlayers();
     }
-
 
     public void CreatePlayers()
     {
         whitePlayer = new ChessPlayer(TeamColor.White, board);
         blackPlayer = new ChessPlayer(TeamColor.Black, board);
     }
+
     public void StartNewGame()
     {
         uiManager.OnGameStarted();
@@ -58,7 +57,8 @@ public abstract class ChessGameController : MonoBehaviour
         SetGameState(GameState.Play);
     }
 
-    public void RestartGame(){
+    public void RestartGame()
+    {
         DestroyAllPieces();
         board.OnGameRestarted();
         whitePlayer.OnGameRestarted();
@@ -72,13 +72,12 @@ public abstract class ChessGameController : MonoBehaviour
         whitePlayer.activePieces.ForEach(piece => Destroy(piece.gameObject));
         blackPlayer.activePieces.ForEach(piece => Destroy(piece.gameObject));
     }
-    
 
-    public bool IsGameInProgress(){
+    public bool IsGameInProgress()
+    {
         return gameState == GameState.Play;
     }
 
- 
     private void CreatePiecesFromLayout(BoardLayout layout)
     {
         for (int i = 0; i < layout.GetPiecesCount(); i++)
@@ -91,8 +90,6 @@ public abstract class ChessGameController : MonoBehaviour
             CreatePieceAndInitialize(squareCoords, team, type);
         }
     }
-
-
 
     public void CreatePieceAndInitialize(Vector2Int squareCoords, TeamColor team, Type type)
     {
@@ -122,7 +119,7 @@ public abstract class ChessGameController : MonoBehaviour
     {
         GenerateAllPossiblePlayerMoves(activePlayer);
         GenerateAllPossiblePlayerMoves(GetOpponentToPlayer(activePlayer));
-        if(CheckIfGameIsFinnished())
+        if (CheckIfGameIsFinnished())
             EndGame();
         else
             ChangeActiveTeam();
@@ -131,15 +128,18 @@ public abstract class ChessGameController : MonoBehaviour
     private bool CheckIfGameIsFinnished()
     {
         Piece[] kingAttackingPieces = activePlayer.GetPiecesAttackingOppositePiece<King>();
-        if(kingAttackingPieces.Length > 0){
+        if (kingAttackingPieces.Length > 0)
+        {
             ChessPlayer opponentPlayer = GetOpponentToPlayer(activePlayer);
             Piece attackedKing = opponentPlayer.GetPiecesOfType<King>().FirstOrDefault();
-            opponentPlayer.RemoveMovesEnablingAttackOnPiece<King>(activePlayer,  attackedKing);
+            opponentPlayer.RemoveMovesEnablingAttackOnPiece<King>(activePlayer, attackedKing);
 
             int avaliableKingMoves = attackedKing.avaliableMoves.Count;
-            if(avaliableKingMoves == 0){
+            if (avaliableKingMoves == 0)
+            {
                 bool canCoverKing = opponentPlayer.CanHidePieceFromAttacking<King>(activePlayer);
-                if(!canCoverKing){
+                if (!canCoverKing)
+                {
                     return true;
                 }
             }
@@ -149,6 +149,12 @@ public abstract class ChessGameController : MonoBehaviour
 
     public void SetupCamera(TeamColor team)
     {
+        if (cameraSetup == null)
+        {
+            Debug.LogError("❌ cameraSetup não está definido no ChessGameController!");
+            return;
+        }
+
         cameraSetup.SetupCamera(team);
     }
 
@@ -159,7 +165,6 @@ public abstract class ChessGameController : MonoBehaviour
         uiManager.OnGameFinished(activePlayer.team.ToString());
         SetGameState(GameState.Finished);
     }
-
 
     private void ChangeActiveTeam()
     {
@@ -178,9 +183,8 @@ public abstract class ChessGameController : MonoBehaviour
 
     public void OnPieceRemoved(Piece piece)
     {
-        ChessPlayer pieceOwner = (piece.team == TeamColor.White) ? whitePlayer : blackPlayer; 
+        ChessPlayer pieceOwner = (piece.team == TeamColor.White) ? whitePlayer : blackPlayer;
         pieceOwner.RemovePiece(piece);
         Destroy(piece.gameObject);
     }
-
 }

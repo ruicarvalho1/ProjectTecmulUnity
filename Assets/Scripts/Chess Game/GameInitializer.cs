@@ -6,7 +6,6 @@ using Photon.Pun;
 public class GameInitializer : MonoBehaviour
 {
     [Header("Game mode dependent objects")]
-
     [SerializeField] private SingleplayerChessGameController singleplayerControllerPrefab;
     [SerializeField] private MultiplayerChessGameController multiplayerControllerPrefab;
     [SerializeField] private MultiplayerBoard multiplayerBoardPrefab;
@@ -21,14 +20,23 @@ public class GameInitializer : MonoBehaviour
     public void CreateMultiplayerBoard()
     {
         if (!networkManager.IsRoomFull())
-            PhotonNetwork.Instantiate(multiplayerBoardPrefab.name, boardAnchor.position, boardAnchor.rotation);
+        {
+            GameObject boardObj = PhotonNetwork.Instantiate(multiplayerBoardPrefab.name, boardAnchor.position, boardAnchor.rotation);
+            StartCoroutine(WaitForBoardAndInit());
+        }
+    }
+
+    private IEnumerator WaitForBoardAndInit()
+    {
+        yield return new WaitUntil(() => FindObjectOfType<MultiplayerBoard>() != null);
+        InitializeMultiplayerController();
     }
 
     public void CreateSinglePlayerBoard()
     {
         Instantiate(singleplayerBoardPrefab, boardAnchor);
     }
-    
+
     public void InitializeMultiplayerController()
     {
         MultiplayerBoard board = FindObjectOfType<MultiplayerBoard>();
@@ -40,9 +48,16 @@ public class GameInitializer : MonoBehaviour
             controller.SetMultiplayerDependencies(networkManager);
             networkManager.SetDependencies(controller);
             board.SetDependencies(controller);
+
+            // Garantir que o jogo inicia corretamente se necessário
+            // controller.StartNewGame(); // Descomente se o jogo não estiver a iniciar automaticamente
+        }
+        else
+        {
+            Debug.LogError("MultiplayerBoard not found! Certifique-se que foi instanciado corretamente.");
         }
     }
-    
+
     public void InitializeSingleplayerController()
     {
         SingleplayerBoard board = FindObjectOfType<SingleplayerBoard>();
@@ -54,9 +69,9 @@ public class GameInitializer : MonoBehaviour
             board.SetDependencies(controller);
             controller.StartNewGame();
         }
+        else
+        {
+            Debug.LogError("SingleplayerBoard not found! Certifique-se que foi instanciado corretamente.");
+        }
     }
-
-
-
-  
 }

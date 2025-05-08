@@ -2,7 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Photon.Realtime;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
+
 
 [RequireComponent(typeof(PieceCreator))]
 public abstract class ChessGameController : MonoBehaviour
@@ -65,25 +69,22 @@ public abstract class ChessGameController : MonoBehaviour
     {
         if (Photon.Pun.PhotonNetwork.InRoom)
         {
-            Debug.Log("Multiplayer: leaving room and disconnecting.");
-            
-            ExitGames.Client.Photon.Hashtable props = Photon.Pun.PhotonNetwork.LocalPlayer.CustomProperties;
-            if (props.ContainsKey("team"))
-            {
-                props["team"] = null; 
-                Photon.Pun.PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-                Debug.Log("Cleared selected team from custom properties.");
-            }
+            Debug.Log("Multiplayer: resetting and reloading scene.");
+
+            Photon.Pun.PhotonNetwork.RaiseEvent(
+                2, 
+                null,
+                new RaiseEventOptions() { Receivers = ReceiverGroup.All },
+                ExitGames.Client.Photon.SendOptions.SendReliable
+            );
 
             Photon.Pun.PhotonNetwork.LeaveRoom();
             Photon.Pun.PhotonNetwork.Disconnect();
         }
         
-        DestroyAllPieces();
-        board.OnGameRestarted();
-        whitePlayer.OnGameRestarted();
-        blackPlayer.OnGameRestarted();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
+
 
 
 

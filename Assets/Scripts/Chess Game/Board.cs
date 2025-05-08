@@ -1,10 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(SquareSelectorCreator))]
-public class Board : MonoBehaviour
+public abstract class Board : MonoBehaviour
 {
     public const int BOARD_SIZE = 8;
 
@@ -16,19 +15,16 @@ public class Board : MonoBehaviour
     private ChessGameController chessController;
     private SquareSelectorCreator squareSelector;
 
-
-    private void Awake()
+    protected virtual void Awake()
     {
         squareSelector = GetComponent<SquareSelectorCreator>();
         CreateGrid();
     }
 
-    public void SetDependencies(ChessGameController chessController)
+    public void SetDependencies(ChessGameController controller)
     {
-        this.chessController = chessController;
+        this.chessController = controller;
     }
-
-
 
     private void CreateGrid()
     {
@@ -40,6 +36,20 @@ public class Board : MonoBehaviour
         return bottomLeftSquareTransform.position + new Vector3(coords.x * squareSize, 0f, coords.y * squareSize);
     }
 
+    internal void OnSetSelectedPiece(Vector2Int coords)
+    {
+        selectedPiece = GetPieceOnSquare(coords);
+    }
+
+    internal void OnSelectedPieceMoved(Vector2Int coords)
+    {
+        TryToTakeOppositePiece(coords);
+        UpdateBoardOnPieceMove(coords, selectedPiece.occupiedSquare, selectedPiece, null);
+        selectedPiece.MovePiece(coords);
+        DeselectPiece();
+        EndTurn();
+    }
+
     private Vector2Int CalculateCoordsFromPosition(Vector3 inputPosition)
     {
         int x = Mathf.FloorToInt(transform.InverseTransformPoint(inputPosition).x / squareSize) + BOARD_SIZE / 2;
@@ -49,46 +59,55 @@ public class Board : MonoBehaviour
 
     public void OnSquareSelected(Vector3 inputPosition)
     {
-        if(!chessController.IsGameInProgress())
-            return;
+        if (chessController == null || !chessController.IsGameInProgress()) return;
+
         Vector2Int coords = CalculateCoordsFromPosition(inputPosition);
         Piece piece = GetPieceOnSquare(coords);
         Debug.Log("Square selected: " + piece);
-        if (selectedPiece)
+
+        if (selectedPiece != null)
         {
             if (piece != null && selectedPiece == piece)
                 DeselectPiece();
             else if (piece != null && selectedPiece != piece && chessController.IsTeamTurnActive(piece.team))
-                SelectPiece(piece);
+                SelectPiece(coords);
             else if (selectedPiece.CanMoveTo(coords))
-                OnSelectedPieceMoved(coords, selectedPiece);
+                SelectedPieceMoved(coords);
         }
         else
         {
             if (piece != null && chessController.IsTeamTurnActive(piece.team))
-                SelectPiece(piece);
+                SelectPiece(coords);
         }
     }
 
+    public abstract void SelectedPieceMoved(Vector2 coords);
+    public abstract void SetSelectedPiece(Vector2 coords);
 
-
-    private void SelectPiece(Piece piece)
+    private void SelectPiece(Vector2Int coords)
     {
+        Piece piece = GetPieceOnSquare(coords);
+        if (piece == null) return;
+
         chessController.RemoveMovesEnablingAttackOnPieceOfType<King>(piece);
-        selectedPiece = piece;
-        List<Vector2Int> selection = selectedPiece.avaliableMoves;
-        ShowSelectionSquares(selection);
+        SetSelectedPiece(coords);
+
+        if (selectedPiece != null)
+        {
+            List<Vector2Int> selection = selectedPiece.avaliableMoves;
+            ShowSelectionSquares(selection);
+        }
     }
 
     private void ShowSelectionSquares(List<Vector2Int> selection)
     {
-        Dictionary<Vector3, bool> squaresData = new Dictionary<Vector3, bool>();
-        for (int i = 0; i < selection.Count; i++)
+        var squaresData = new Dictionary<Vector3, bool>();
+        foreach (var square in selection)
         {
-            Vector3 position = CalculatePositionFromCoords(selection[i]);
-            bool isSquareFree = GetPieceOnSquare(selection[i]) == null;
-            squaresData.Add(position, isSquareFree);
-        } 
+            Vector3 position = CalculatePositionFromCoords(square);
+            bool isFree = GetPieceOnSquare(square) == null;
+            squaresData[position] = isFree;
+        }
         squareSelector.ShowSelection(squaresData);
     }
 
@@ -96,32 +115,6 @@ public class Board : MonoBehaviour
     {
         selectedPiece = null;
         squareSelector.ClearSelection();
-    }
-
-    private void OnSelectedPieceMoved(Vector2Int coords, Piece piece)
-    {
-        TryToTakeOpponentPiece(coords);
-        UpdateBoardOnPieceMove(coords, piece.occupiedSquare, piece, null);
-        selectedPiece.MovePiece(coords);
-        DeselectPiece();
-        EndTurn();
-    }
-
-    private void TryToTakeOpponentPiece(Vector2Int coords)
-    {
-        Piece piece = GetPieceOnSquare(coords);
-        if (piece != null && !selectedPiece.IsFromSameTeam(piece))
-        {
-            TakePiece(piece);
-        }
-    }
-
-    private void TakePiece(Piece piece)
-    {
-        if(piece){
-            grid[piece.occupiedSquare.x, piece.occupiedSquare.y] = null;
-            chessController.OnPieceRemoved(piece);
-        }
     }
 
     private void EndTurn()
@@ -137,28 +130,18 @@ public class Board : MonoBehaviour
 
     public Piece GetPieceOnSquare(Vector2Int coords)
     {
-        if (CheckIfCoordinatesAreOnBoard(coords))
-            return grid[coords.x, coords.y];
-        return null;
+        return CheckIfCoordinatesAreOnBoard(coords) ? grid[coords.x, coords.y] : null;
     }
 
     public bool CheckIfCoordinatesAreOnBoard(Vector2Int coords)
     {
-        if (coords.x < 0 || coords.y < 0 || coords.x >= BOARD_SIZE || coords.y >= BOARD_SIZE)
-            return false;
-        return true;
+        return coords.x >= 0 && coords.y >= 0 && coords.x < BOARD_SIZE && coords.y < BOARD_SIZE;
     }
 
     public bool HasPiece(Piece piece)
     {
-        for (int i = 0; i < BOARD_SIZE; i++)
-        {
-            for (int j = 0; j < BOARD_SIZE; j++)
-            {
-                if (grid[i, j] == piece)
-                    return true;
-            }
-        }
+        foreach (var p in grid)
+            if (p == piece) return true;
         return false;
     }
 
@@ -168,10 +151,18 @@ public class Board : MonoBehaviour
             grid[coords.x, coords.y] = piece;
     }
 
-    internal void OnGameRestarted()
+    private void TryToTakeOppositePiece(Vector2Int coords)
     {
-        selectedPiece = null; 
-        CreateGrid();
+        Piece piece = GetPieceOnSquare(coords);
+        if (piece != null && !selectedPiece.IsFromSameTeam(piece))
+            TakePiece(piece);
+    }
+
+    private void TakePiece(Piece piece)
+    {
+        grid[piece.occupiedSquare.x, piece.occupiedSquare.y] = null;
+        chessController.OnPieceRemoved(piece);
+        Destroy(piece.gameObject);
     }
 
     public void PromotePiece(Piece piece)
@@ -180,4 +171,9 @@ public class Board : MonoBehaviour
         chessController.CreatePieceAndInitialize(piece.occupiedSquare, piece.team, typeof(Queen));
     }
 
+    internal void OnGameRestarted()
+    {
+        selectedPiece = null;
+        CreateGrid();
+    }
 }

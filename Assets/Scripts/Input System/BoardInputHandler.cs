@@ -1,21 +1,19 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Board))]
 public class BoardInputHandler : MonoBehaviour, IInputHandler
 {
-    private Board board;
+    private SingleplayerBoard board;
 
     private void Awake()
     {
-        board = GetComponent<Board>();
+        board = GetComponent<SingleplayerBoard>();
+        
     }
 
     public void ProcessInput(Vector3 inputPosition, GameObject selectedObject, Action onClick)
     {
-        //Debug.Log("Input Position: " + inputPosition);
-        board.OnSquareSelected(inputPosition);
+        if (board != null)
+            board.OnSquareSelected(inputPosition);
     }
 }

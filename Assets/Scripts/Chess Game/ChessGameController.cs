@@ -42,7 +42,7 @@ public class ChessGameController : MonoBehaviour
 
     private void StartNewGame()
     {
-        uiManager.HideUI();
+        //uiManager.HideUI();
         SetGameState(GameState.Init);
         board.SetDependencies(this);
         CreatePiecesFromLayout(startingBoardLayout);
@@ -148,7 +148,7 @@ public class ChessGameController : MonoBehaviour
     private void EndGame()
     {
         Debug.Log("Game Finished!");
-        uiManager.OnGameFinished(activePlayer.team.ToString());
+        //uiManager.OnGameFinished(activePlayer.team.ToString());
         SetGameState(GameState.Finished);
     }
 

@@ -15,6 +15,7 @@ public class RestartButtonHandler : MonoBehaviourPunCallbacks
         {
         
             PhotonNetwork.LeaveRoom();
+            PhotonNetwork.Disconnect();
             gameController.RestartGame();
             ShowMainMenu();
             

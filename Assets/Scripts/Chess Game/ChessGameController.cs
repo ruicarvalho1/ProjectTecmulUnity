@@ -59,13 +59,14 @@ public abstract class ChessGameController : MonoBehaviour
 
     public void RestartGame()
     {
-        DestroyAllPieces();
-        board.OnGameRestarted();
-        whitePlayer.OnGameRestarted();
-        blackPlayer.OnGameRestarted();
-        StartNewGame();
-        TryToStartThisGame();
+        DestroyAllPieces();                      
+        board.OnGameRestarted();                
+        whitePlayer.OnGameRestarted();           
+        blackPlayer.OnGameRestarted();           
+        StartNewGame();                         
+        TryToStartThisGame();                    
     }
+
 
     private void DestroyAllPieces()
     {

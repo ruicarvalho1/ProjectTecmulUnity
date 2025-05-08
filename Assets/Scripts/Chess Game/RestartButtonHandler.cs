@@ -10,31 +10,35 @@ public class RestartButtonHandler : MonoBehaviourPunCallbacks
     {
         Debug.Log("Restart button clicked");
 
-        if (PhotonNetwork.InRoom)
+        var gameController = FindObjectOfType<ChessGameController>();
+        if (gameController != null)
         {
-            Debug.Log("Multiplayer: leaving room...");
-            PhotonNetwork.LeaveRoom();
+            gameController.RestartGame();
         }
         else
         {
-            ShowMainMenu();
+            Debug.LogWarning("No ChessGameController found.");
+        }
+
+        if (PhotonNetwork.InRoom)
+        {
+            Debug.Log("Multiplayer: leaving room after restart.");
+            PhotonNetwork.LeaveRoom(); 
+        }
+        else
+        {
+            ShowMainMenu(); 
         }
     }
 
     public override void OnLeftRoom()
     {
-        Debug.Log("Left room. Returning to main menu.");
+        Debug.Log("Multiplayer: left room. Showing main menu.");
         ShowMainMenu();
     }
 
     private void ShowMainMenu()
     {
-        var gameController = FindObjectOfType<ChessGameController>();
-        if (gameController != null)
-        {
-            Destroy(gameController.gameObject);
-        }
-
         if (gameOverScreen != null)
             gameOverScreen.SetActive(false);
 

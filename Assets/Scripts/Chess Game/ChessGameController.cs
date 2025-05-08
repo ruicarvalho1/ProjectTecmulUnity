@@ -151,7 +151,7 @@ public abstract class ChessGameController : MonoBehaviour
     {
         if (cameraSetup == null)
         {
-            Debug.LogError("❌ cameraSetup não está definido no ChessGameController!");
+            
             return;
         }
 

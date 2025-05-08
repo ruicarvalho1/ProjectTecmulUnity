@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using TMPro;
 
 public class ChessUIManager : MonoBehaviour
 {
@@ -15,7 +16,7 @@ public class ChessUIManager : MonoBehaviour
 	[SerializeField] private Button blackTeamButtonButton;
 
 	[Header("Texts")]
-	[SerializeField] private Text finishText;
+	[SerializeField] private TextMeshProUGUI finishText;
 	[SerializeField] private Text connectionStatus;
 
 	[Header("Screen Gameobjects")]

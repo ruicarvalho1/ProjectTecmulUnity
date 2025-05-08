@@ -17,7 +17,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     private ChessLevel playerLevel;
 
-    private bool shouldJoinAfterConnect = false; // <- novo flag
+    private bool shouldJoinAfterConnect = false; 
 
     void Awake()
     {
@@ -39,7 +39,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         else
         {
             Debug.Log("Connecting to Photon...");
-            shouldJoinAfterConnect = true; // <- ativar flag
+            shouldJoinAfterConnect = true; 
             PhotonNetwork.ConnectUsingSettings();
         }
     }

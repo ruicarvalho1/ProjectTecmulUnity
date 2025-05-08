@@ -9,16 +9,18 @@ public class RestartButtonHandler : MonoBehaviourPunCallbacks
     public void OnRestartButtonClicked()
     {
         Debug.Log("Restart button clicked");
+        var gameController = FindObjectOfType<ChessGameController>();
 
-        if (PhotonNetwork.InRoom)
+        if (PhotonNetwork.InRoom && gameController != null)
         {
         
             PhotonNetwork.LeaveRoom();
+            gameController.RestartGame();
+            ShowMainMenu();
+            
         }
         else
         {
-          
-            var gameController = FindObjectOfType<ChessGameController>();
             if (gameController != null)
             {
                 gameController.RestartGame();
@@ -34,9 +36,9 @@ public class RestartButtonHandler : MonoBehaviourPunCallbacks
         var gameController = FindObjectOfType<ChessGameController>();
         if (gameController != null)
         {
-            Destroy(gameController.gameObject); // remove completamente o controlador antigo
+            Destroy(gameController.gameObject); 
         }
-        ShowMainMenu(); // só mostra o menu, não reinicia nada
+        ShowMainMenu(); 
     }
 
 

@@ -1,10 +1,8 @@
 using UnityEngine;
-using Photon.Pun;  // necessário para usar PhotonNetwork
+using Photon.Pun;
 
 public class RestartButtonHandler : MonoBehaviourPunCallbacks
 {
-    private ChessGameController gameController;
-
     [SerializeField] private GameObject gameModeSelectionScreen;
     [SerializeField] private GameObject gameOverScreen;
 
@@ -14,34 +12,29 @@ public class RestartButtonHandler : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.InRoom)
         {
-            Debug.Log("Multiplayer detected: leaving room...");
+            Debug.Log("Multiplayer: leaving room...");
             PhotonNetwork.LeaveRoom(); 
         }
         else
         {
-            RestartLocalGame(); 
+            ShowMainMenu(); 
         }
     }
 
     public override void OnLeftRoom()
     {
-        Debug.Log("Left multiplayer room. Showing menu and cleaning up...");
-        RestartLocalGame();
+        Debug.Log("Left room. Returning to main menu.");
+        ShowMainMenu();
     }
 
-    private void RestartLocalGame()
+    private void ShowMainMenu()
     {
-        if (gameController == null)
-        {
-            gameController = FindObjectOfType<ChessGameController>();
-            if (gameController == null)
-            {
-                Debug.LogWarning("No ChessGameController found.");
-                return;
-            }
-        }
 
-        gameController.RestartGame();
+        var gameController = FindObjectOfType<ChessGameController>();
+        if (gameController != null)
+        {
+            Destroy(gameController.gameObject); 
+        }
 
         if (gameOverScreen != null)
             gameOverScreen.SetActive(false);

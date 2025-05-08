@@ -12,6 +12,8 @@ public abstract class ChessGameController : MonoBehaviour
     [SerializeField] private BoardLayout startingBoardLayout;
     private Board board;
     private ChessUIManager uiManager;
+    private CameraSetup cameraSetup;
+    
 
     private PieceCreator pieceCreator;
     protected ChessPlayer whitePlayer;
@@ -28,10 +30,11 @@ public abstract class ChessGameController : MonoBehaviour
         pieceCreator = GetComponent<PieceCreator>();
     }
 
-    internal void SetDependencies( ChessUIManager uIManager, Board board)
+    internal void SetDependencies( ChessUIManager uIManager, Board board, CameraSetup cameraSetup)
     {
         this.uiManager = uIManager;
         this.board = board;
+        this.cameraSetup = cameraSetup;
     }
 
     public void InitializeGame()
@@ -47,7 +50,7 @@ public abstract class ChessGameController : MonoBehaviour
     }
     public void StartNewGame()
     {
-        //uiManager.HideUI();
+        uiManager.OnGameStarted();
         SetGameState(GameState.Init);
         CreatePiecesFromLayout(startingBoardLayout);
         activePlayer = whitePlayer;
@@ -75,7 +78,7 @@ public abstract class ChessGameController : MonoBehaviour
         return gameState == GameState.Play;
     }
 
-
+ 
     private void CreatePiecesFromLayout(BoardLayout layout)
     {
         for (int i = 0; i < layout.GetPiecesCount(); i++)
@@ -144,11 +147,16 @@ public abstract class ChessGameController : MonoBehaviour
         return false;
     }
 
+    public void SetupCamera(TeamColor team)
+    {
+        cameraSetup.SetupCamera(team);
+    }
+
 
     private void EndGame()
     {
         Debug.Log("Game Finished!");
-        //uiManager.OnGameFinished(activePlayer.team.ToString());
+        uiManager.OnGameFinished(activePlayer.team.ToString());
         SetGameState(GameState.Finished);
     }
 

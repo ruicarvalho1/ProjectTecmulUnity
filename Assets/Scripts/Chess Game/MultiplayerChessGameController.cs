@@ -42,12 +42,14 @@ public class MultiplayerChessGameController : ChessGameController, IOnEventCallb
             SetGameState(GameState.Play);
         }
     }
-
+    
     public override bool CanPerformMove()
     {
-        return IsGameInProgress() && IsLocalPlayersTurn();
+        if (!IsGameInProgress() || !IsLocalPlayersTurn())
+            return false;
+
+        return true;
     }
-    
     protected override void SetGameState(GameState state)
     {
         object[] content = new object[] { (int)state };

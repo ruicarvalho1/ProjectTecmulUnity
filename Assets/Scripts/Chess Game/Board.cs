@@ -59,7 +59,7 @@ public abstract class Board : MonoBehaviour
 
     public void OnSquareSelected(Vector3 inputPosition)
     {
-        if (chessController == null || !chessController.IsGameInProgress() || !chessController.CanPerformMove())
+        if (!chessController || !chessController.IsGameInProgress() || !chessController.CanPerformMove())
             return;
 
         Vector2Int coords = CalculateCoordsFromPosition(inputPosition);

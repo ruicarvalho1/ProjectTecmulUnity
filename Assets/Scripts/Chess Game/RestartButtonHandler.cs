@@ -10,25 +10,14 @@ public class RestartButtonHandler : MonoBehaviourPunCallbacks
     {
         Debug.Log("Restart button clicked");
         var gameController = FindObjectOfType<ChessGameController>();
-
-        if (PhotonNetwork.InRoom && gameController != null)
-        {
         
-            PhotonNetwork.LeaveRoom();
-            PhotonNetwork.Disconnect();
-            gameController.RestartGame();
-            ShowMainMenu();
-            
-        }
-        else
-        {
             if (gameController != null)
             {
                 gameController.RestartGame();
             }
 
             ShowMainMenu();
-        }
+        
     }
 
     public override void OnLeftRoom()

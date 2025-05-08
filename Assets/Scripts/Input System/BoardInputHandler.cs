@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Photon.Pun;
 
 public class BoardInputHandler : MonoBehaviour, IInputHandler
 {
@@ -12,13 +13,17 @@ public class BoardInputHandler : MonoBehaviour, IInputHandler
 
     public void ProcessInput(Vector3 inputPosition, GameObject selectedObject, Action onClick)
     {
-        if (board != null)
+        if (board == null)
         {
-            board.OnSquareSelected(inputPosition);
+           
+            return;
         }
-        else
+        
+        if (PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom.PlayerCount < 2)
         {
-            Debug.LogError("Board is null in BoardInputHandler!");
+            return;
         }
+
+        board.OnSquareSelected(inputPosition);
     }
 }

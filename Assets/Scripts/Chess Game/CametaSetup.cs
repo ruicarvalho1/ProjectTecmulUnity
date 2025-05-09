@@ -18,7 +18,7 @@ public class CameraSetup : MonoBehaviour
     private void FlipCamera()
     {
         
-        mainCamera.transform.position = new Vector3(mainCamera.transform.position.x, mainCamera.transform.position.y, 163.69f);
+        mainCamera.transform.position = new Vector3(mainCamera.transform.position.x, mainCamera.transform.position.y, 161.2f);
         mainCamera.transform.Rotate(Vector3.up, 180f, Space.World);
     }
 }

@@ -28,7 +28,7 @@ public class GameInitializer : MonoBehaviour
 
     private IEnumerator WaitForBoardAndInit()
     {
-        yield return new WaitUntil(() => FindObjectOfType<MultiplayerBoard>() != null);
+        yield return new WaitUntil(() => FindFirstObjectByType<MultiplayerBoard>() != null);
         InitializeMultiplayerController();
     }
 
@@ -39,7 +39,7 @@ public class GameInitializer : MonoBehaviour
 
     public void InitializeMultiplayerController()
     {
-        MultiplayerBoard board = FindObjectOfType<MultiplayerBoard>();
+        MultiplayerBoard board = FindFirstObjectByType<MultiplayerBoard>();
         if (board)
         {
             MultiplayerChessGameController controller = Instantiate(multiplayerControllerPrefab);
@@ -54,13 +54,13 @@ public class GameInitializer : MonoBehaviour
         }
         else
         {
-            Debug.LogError("MultiplayerBoard not found! Certifique-se que foi instanciado corretamente.");
+            Debug.Log("MultiplayerBoard not found! Certifique-se que foi instanciado corretamente.");
         }
     }
 
     public void InitializeSingleplayerController()
     {
-        SingleplayerBoard board = FindObjectOfType<SingleplayerBoard>();
+        SingleplayerBoard board = FindFirstObjectByType<SingleplayerBoard>();
         if (board)
         {
             SingleplayerChessGameController controller = Instantiate(singleplayerControllerPrefab);
@@ -71,7 +71,7 @@ public class GameInitializer : MonoBehaviour
         }
         else
         {
-            Debug.LogError("SingleplayerBoard not found! Certifique-se que foi instanciado corretamente.");
+            Debug.Log("SingleplayerBoard not found! Certifique-se que foi instanciado corretamente.");
         }
     }
 }

@@ -31,7 +31,7 @@ public class PieceCreator : MonoBehaviour
     {
         if (!nameToPieceDict.TryGetValue(type.ToString(), out GameObject prefab))
         {
-            Debug.LogError($"No prefab found for type: {type}");
+            Debug.Log($"No prefab found for type: {type}");
             return null;
         }
 

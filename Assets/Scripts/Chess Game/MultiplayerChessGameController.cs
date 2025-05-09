@@ -77,7 +77,7 @@ public class MultiplayerChessGameController : ChessGameController, IOnEventCallb
             }
             else
             {
-                Debug.LogError("Invalid data received in SET_GAME_STATE_EVENT_CODE.");
+                Debug.Log("Invalid data received in SET_GAME_STATE_EVENT_CODE.");
             }
         }
     }

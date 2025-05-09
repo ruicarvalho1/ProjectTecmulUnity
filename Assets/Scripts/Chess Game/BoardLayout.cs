@@ -23,7 +23,7 @@ public class BoardLayout : ScriptableObject
     {
         if (boardSquares.Length <= index)
         {
-            Debug.LogError("Index of piece is out of range");
+            Debug.Log("Index of piece is out of range");
             return new Vector2Int(-1, -1);
         }
 
@@ -34,7 +34,7 @@ public class BoardLayout : ScriptableObject
     {
         if (boardSquares.Length <= index)
         {
-            Debug.LogError("Index of piece is out of range");
+            Debug.Log("Index of piece is out of range");
             return "";
         }
 
@@ -45,7 +45,7 @@ public class BoardLayout : ScriptableObject
     {
         if (boardSquares.Length <= index)
         {
-            Debug.LogError("Index of piece is out of range");
+            Debug.Log("Index of piece is out of range");
             return TeamColor.Black;
         }
 

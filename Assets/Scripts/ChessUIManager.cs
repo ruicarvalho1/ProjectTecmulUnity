@@ -67,7 +67,7 @@ public class ChessUIManager : MonoBehaviour
 		GameOverScreen.SetActive(true);
 		TeamSelectionScreen.SetActive(false);
 		ConnectScreen.SetActive(false);
-		finishText.text = string.Format("{0} won", winner);
+		finishText.text = string.Format("{0} Venceu!", winner);
 	}
 
 	public void OnConnect()

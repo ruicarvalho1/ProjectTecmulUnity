@@ -10,7 +10,7 @@ public class RestartButtonHandler : MonoBehaviourPunCallbacks
     public void OnRestartButtonClicked()
     {
         Debug.Log("Restart button clicked");
-        var gameController = FindObjectOfType<ChessGameController>();
+        var gameController = FindFirstObjectByType<ChessGameController>();
         
             if (gameController != null)
             {
@@ -24,7 +24,7 @@ public class RestartButtonHandler : MonoBehaviourPunCallbacks
     public override void OnLeftRoom()
     {
         Debug.Log("Left room. Returning to menu.");
-        var gameController = FindObjectOfType<ChessGameController>();
+        var gameController = FindFirstObjectByType<ChessGameController>();
         if (gameController != null)
         {
             Destroy(gameController.gameObject); 

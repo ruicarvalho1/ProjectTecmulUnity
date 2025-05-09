@@ -62,7 +62,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        Debug.LogError($"Connected to Master Server.");
+        Debug.Log($"Connected to Master Server.");
         if (shouldJoinAfterConnect)
         {
             shouldJoinAfterConnect = false;
@@ -74,7 +74,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
-        Debug.LogError($"Joining random room failed: {message}. Creating new room.");
+        Debug.Log($"Joining random room failed: {message}. Creating new room.");
         PhotonNetwork.CreateRoom(null, new RoomOptions
         {
             CustomRoomPropertiesForLobby = new string[] { LEVEL },
@@ -85,7 +85,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        Debug.LogError($"Player {PhotonNetwork.LocalPlayer.ActorNumber} joined room with level: {(ChessLevel)PhotonNetwork.CurrentRoom.CustomProperties[LEVEL]}");
+        Debug.Log($"Player {PhotonNetwork.LocalPlayer.ActorNumber} joined room with level: {(ChessLevel)PhotonNetwork.CurrentRoom.CustomProperties[LEVEL]}");
 
         if (gameInitializer == null)
             return;
@@ -111,7 +111,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        Debug.LogError($"Player {newPlayer.ActorNumber} entered the room");
+        Debug.Log($"Player {newPlayer.ActorNumber} entered the room");
     }
 
     #endregion
@@ -140,7 +140,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
         if (chessGameController == null)
         {
-            chessGameController = FindObjectOfType<MultiplayerChessGameController>();
+            chessGameController = FindFirstObjectByType<MultiplayerChessGameController>();
             if (chessGameController == null)
                 return;
         }

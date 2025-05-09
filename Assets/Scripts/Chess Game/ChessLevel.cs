@@ -1,4 +1,4 @@
 public enum ChessLevel
 {
-    Beginner, Regular, Pro
+    Iniciante, Intermédio, Profissonal
 }

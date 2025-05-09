@@ -51,7 +51,7 @@ public abstract class Piece : MonoBehaviour
         hasMoved = true;
         tweener.MoveTo(transform, targetPosition);
 
-        FindObjectOfType<AudioInputHandler>()?.PlayMoveSound();
+        FindFirstObjectByType<AudioInputHandler>()?.PlayMoveSound();
     }
 
 

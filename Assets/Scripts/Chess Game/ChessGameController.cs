@@ -69,7 +69,6 @@ public abstract class ChessGameController : MonoBehaviour
     {
         if (Photon.Pun.PhotonNetwork.InRoom)
         {
-            Debug.Log("Multiplayer: resetting and reloading scene.");
 
             Photon.Pun.PhotonNetwork.RaiseEvent(
                 2, 
